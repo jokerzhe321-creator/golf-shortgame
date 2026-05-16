@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高尔夫短杆训练记录</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2E7D32', // 高尔夫绿
+                        secondary: '#4CAF50',
+                        accent: '#8BC34A',
+                        light: '#E8F5E9',
+                        dark: '#1B5E20',
+                        warning: '#FFC107',
+                        danger: '#F44336',
+                        info: '#2196F3'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'golf-bg': "url('https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/eff2a3f2a95b4fedb5b46bf5490bd5f3~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260515054730C5373A38A3F1F033983F&rrcfp=f06b921b&x-expires=1781387282&x-signature=14ClJWC%2FhljZxFzkhNTGRtZ67Gg%3D')",
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            }
+            .bg-blur {
+                backdrop-filter: blur(8px);
+            }
+            .transition-all-300 {
+                transition: all 300ms ease-in-out;
+            }
+            .btn-golf {
+                @apply bg-primary text-white font-bold py-4 px-6 rounded-lg shadow-lg hover:bg-dark transition-all-300 text-xl;
+            }
+            .btn-golf-secondary {
+                @apply bg-secondary text-white font-bold py-3 px-5 rounded-lg shadow-md hover:bg-primary transition-all-300 text-lg;
+            }
+            .btn-golf-outline {
+                @apply border-2 border-primary text-primary font-bold py-3 px-5 rounded-lg shadow-md hover:bg-primary hover:text-white transition-all-300 text-lg;
+            }
+            .card-golf {
+                @apply bg-white bg-opacity-90 rounded-xl shadow-xl p-6 backdrop-blur-sm;
+            }
+            .radio-group {
+                @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-2;
+            }
+            .radio-label {
+                @apply flex items-center justify-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary transition-all-300;
+            }
+            .radio-input:checked + .radio-label {
+                @apply border-primary bg-light text-primary font-bold;
+            }
+            .step-item {
+                @apply flex items-center p-4 border-b border-gray-200;
+            }
+            .step-item.active {
+                @apply bg-light border-primary;
+            }
+            .step-item.completed {
+                @apply bg-green-100 border-green-300;
+            }
+            .tab-button {
+                @apply py-3 px-4 font-bold rounded-t-lg;
+            }
+            .tab-button.active {
+                @apply bg-white text-primary border-b-2 border-primary;
+            }
+            .tab-button:not(.active) {
+                @apply bg-gray-100 text-gray-600 hover:bg-gray-200;
+            }
+        }
+    </style>
+</head>
+<body class="bg-golf-bg bg-cover bg-fixed min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <!-- 应用标题 -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white text-shadow">高尔夫短杆训练记录</h1>
+            <p class="text-xl text-white text-shadow mt-2">提升你的短杆技术，记录每一次进步</p>
+        </header>
+
+        <!-- 主内容区域 -->
+        <main>
+            <!-- 导航菜单 -->
+            <div id="nav-menu" class="card-golf mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button id="start-training-btn" class="btn-golf flex items-center justify-center">
+                        <i class="fa fa-play-circle mr-2"></i> 开始训练
+                    </button>
+                    <button id="history-btn" class="btn-golf-secondary flex items-center justify-center">
+                        <i class="fa fa-history mr-2"></i> 历史记录
+                    </button>
+                    <button id="statistics-btn" class="btn-golf-secondary flex items-center justify-center">
+                        <i class="fa fa-bar-chart mr-2"></i> 数据统计
+                    </button>
+                    <button id="templates-btn" class="btn-golf-secondary flex items-center justify-center">
+                        <i class="fa fa-bookmark mr-2"></i> 训练模板
+                    </button>
+                </div>
+            </div>
+
+            <!-- 页面容器 -->
+            <div id="page-container">
+                <!-- 首页 -->
+                <div id="home-page" class="page active">
+                    <div class="card-golf mb-6">
+                        <h2 class="text-2xl font-bold text-primary mb-4">欢迎使用短杆训练记录应用</h2>
+                        <p class="text-gray-700 mb-4">本应用帮助你记录和分析短杆训练数据，提升你的果岭周边技术。</p>
+                        <div class="bg-light p-4 rounded-lg">
+                            <h3 class="font-bold text-lg mb-2">今日训练概览</h3>
+                            <div id="today-summary" class="text-gray-700">
+                                <p>今天还没有训练记录，点击"开始训练"开始你的短杆练习。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 果岭研判页面 -->
+                <div id="course-judgment-page" class="page hidden">
+                    <div class="card-golf mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-primary">果岭研判</h2>
+                            <button class="back-btn btn-golf-outline py-2 px-3 text-base">
+                                <i class="fa fa-arrow-left mr-1"></i> 返回
+                            </button>
+                        </div>
+                        
+                        <form id="course-judgment-form">
+                            <!-- 到旗杆距离 -->
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">到旗杆距离</label>
+                                <div class="radio-group" id="distance-to-pin-group">
+                                    <!-- 由JS动态生成 -->
+                                </div>
+                            </div>
+                            
+                            <!-- 上下坡选择 -->
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">上下坡选择</label>
+                                <div class="radio-group">
+                                    <input type="radio" id="slope-flat" name="slope" value="平坡" class="radio-input hidden" checked>
+                                    <label for="slope-flat" class="radio-label">平坡</label>
+                                    
+                                    <input type="radio" id="slope-up" name="slope" value="上坡" class="radio-input hidden">
+                                    <label for="slope-up" class="radio-label">上坡</label>
+                                    
+                                    <input type="radio" id="slope-down" name="slope" value="下坡" class="radio-input hidden">
+                                    <label for="slope-down" class="radio-label">下坡</label>
+                                </div>
+                            </div>
+                            
+                            <!-- 左右高低选择 -->
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">左右高低选择</label>
+                                <div class="radio-group">
+                                    <input type="radio" id="level-horizontal" name="leftRightLevel" value="水平" class="radio-input hidden" checked>
+                                    <label for="level-horizontal" class="radio-label">水平</label>
+                                    
+                                    <input type="radio" id="level-left-high" name="leftRightLevel" value="左边高" class="radio-input hidden">
+                                    <label for="level-left-high" class="radio-label">左边高</label>
+                                    
+                                    <input type="radio" id="level-right-high" name="leftRightLevel" value="右边高" class="radio-input hidden">
+                                    <label for="level-right-high" class="radio-label">右边高</label>
+                                </div>
+                            </div>
+                            
+                            <!-- 前方障碍选择 -->
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">前方障碍选择</label>
+                                <div class="radio-group">
+                                    <input type="radio" id="obstacle-none" name="frontObstacle" value="无障碍" class="radio-input hidden" checked>
+                                    <label for="obstacle-none" class="radio-label">无障碍</label>
+                                    
+                                    <input type="radio" id="obstacle-rough" name="frontObstacle" value="长草障碍" class="radio-input hidden">
+                                    <label for="obstacle-rough" class="radio-label">长草障碍</label>
+                                    
+                                    <input type="radio" id="obstacle-bunker" name="frontObstacle" value="沙坑障碍" class="radio-input hidden">
+                                    <label for="obstacle-bunker" class="radio-label">沙坑障碍</label>
+                                    
+                                    <input type="radio" id="obstacle-slope" name="frontObstacle" value="小坡障碍" class="radio-input hidden">
+                                    <label for="obstacle-slope" class="radio-label">小坡障碍</label>
+                                </div>
+                            </div>
+                            
+                            <!-- 打法选择 -->
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">打法选择</label>
+                                <div class="radio-group">
+                                    <input type="radio" id="shot-chip" name="shotType" value="切滚球" class="radio-input hidden" checked>
+                                    <label for="shot-chip" class="radio-label">切滚球</label>
+                                    
+                                    <input type="radio" id="shot-pitch" name="shotType" value="劈起球" class="radio-input hidden">
+                                    <label for="shot-pitch" class="radio-label">劈起球</label>
+                                </div>
+                            </div>
+                            
+                            <!-- 球杆选择 -->
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">球杆选择</label>
+                                <div class="radio-group" id="club-group">
+                                    <!-- 由JS动态生成 -->
+                                </div>
+                            </div>
+                            
+                            <!-- 落点距离选择 -->
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">落点距离</label>
+                                <div class="radio-group" id="landing-distance-group">
+                                    <!-- 由JS动态生成 -->
+                                </div>
+                                <p id="distance-warning" class="text-danger mt-2 hidden">
+                                    <i class="fa fa-exclamation-triangle mr-1"></i> 落点距离不能大于到旗杆总距离
+                                </p>
+                            </div>
+                            
+                            <div class="flex justify-between mt-8">
+                                <button type="button" id="save-template-btn" class="btn-golf-outline">
+                                    <i class="fa fa-save mr-2"></i> 保存为模板
+                                </button>
+                                <button type="button" id="next-to-process-btn" class="btn-golf">
+                                    下一步 <i class="fa fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 击球流程页面 -->
+                <div id="shot-process-page" class="page hidden">
+                    <div class="card-golf mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-primary">标准击球流程</h2>
+                            <button class="back-btn btn-golf-outline py-2 px-3 text-base">
+                                <i class="fa fa-arrow-left mr-1"></i> 返回
+                            </button>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <div id="process-steps" class="space-y-3">
+                                <div class="step-item active" data-step="1">
+                                    <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mr-4">1</div>
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-lg">准备击球</h3>
+                                        <p class="text-gray-600">确认球位和目标线路</p>
+                                    </div>
+                                    <div class="step-status">
+                                        <i class="fa fa-circle-o text-2xl text-gray-300"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="step-item" data-step="2">
+                                    <div class="w-10 h-10 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold mr-4">2</div>
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-lg">多次试挥</h3>
+                                        <p class="text-gray-600">感受挥杆节奏和击球感觉</p>
+                                    </div>
+                                    <div class="step-status">
+                                        <i class="fa fa-circle-o text-2xl text-gray-300"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="step-item" data-step="3">
+                                    <div class="w-10 h-10 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold mr-4">3</div>
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-lg">对准落点瞄准</h3>
+                                        <p class="text-gray-600">确定准确的目标方向</p>
+                                    </div>
+                                    <div class="step-status">
+                                        <i class="fa fa-circle-o text-2xl text-gray-300"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="step-item" data-step="4">
+                                    <div class="w-10 h-10 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold mr-4">4</div>
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-lg">标准站位设定</h3>
+                                        <p class="text-gray-600">调整身体姿势和球杆位置</p>
+                                    </div>
+                                    <div class="step-status">
+                                        <i class="fa fa-circle-o text-2xl text-gray-300"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="step-item" data-step="5">
+                                    <div class="w-10 h-10 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold mr-4">5</div>
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-lg">正式击球</h3>
+                                        <p class="text-gray-600">平稳执行挥杆动作</p>
+                                    </div>
+                                    <div class="step-status">
+                                        <i class="fa fa-circle-o text-2xl text-gray-300"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="step-item" data-step="6">
+                                    <div class="w-10 h-10 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold mr-4">6</div>
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-lg">收杆定住不抬头</h3>
+                                        <p class="text-gray-600">保持平衡直到球落地</p>
+                                    </div>
+                                    <div class="step-status">
+                                        <i class="fa fa-circle-o text-2xl text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between mt-8">
+                            <button id="prev-step-btn" class="btn-golf-outline" disabled>
+                                <i class="fa fa-arrow-left mr-2"></i> 上一步
+                            </button>
+                            <button id="next-step-btn" class="btn-golf">
+                                下一步 <i class="fa fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 训练设置页面 -->
+                <div id="training-setup-page" class="page hidden">
+                    <div class="card-golf mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-primary">训练设置</h2>
+                            <button class="back-btn btn-golf-outline py-2 px-3 text-base">
+                                <i class="fa fa-arrow-left mr-1"></i> 返回
+                            </button>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <div class="bg-light p-4 rounded-lg mb-6">
+                                <h3 class="font-bold text-lg mb-2">训练信息</h3>
+                                <div id="training-info" class="text-gray-700">
+                                    <!-- 由JS动态生成 -->
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">每组球数</label>
+                                <div class="bg-light p-4 rounded-lg text-center">
+                                    <span class="text-3xl font-bold text-primary">6</span> 球/组
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">今日训练组数</label>
+                                <div class="radio-group" id="group-count-group">
+                                    <input type="radio" id="groups-1" name="groupCount" value="1" class="radio-input hidden" checked>
+                                    <label for="groups-1" class="radio-label">1组</label>
+                                    
+                                    <input type="radio" id="groups-2" name="groupCount" value="2" class="radio-input hidden">
+                                    <label for="groups-2" class="radio-label">2组</label>
+                                    
+                                    <input type="radio" id="groups-3" name="groupCount" value="3" class="radio-input hidden">
+                                    <label for="groups-3" class="radio-label">3组</label>
+                                    
+                                    <input type="radio" id="groups-4" name="groupCount" value="4" class="radio-input hidden">
+                                    <label for="groups-4" class="radio-label">4组</label>
+                                    
+                                    <input type="radio" id="groups-5" name="groupCount" value="5" class="radio-input hidden">
+                                    <label for="groups-5" class="radio-label">5组</label>
+                                    
+                                    <input type="radio" id="groups-custom" name="groupCount" value="custom" class="radio-input hidden">
+                                    <label for="groups-custom" class="radio-label">自定义</label>
+                                </div>
+                                
+                                <div id="custom-group-input" class="mt-4 hidden">
+                                    <div class="flex items-center">
+                                        <input type="number" id="custom-group-count" min="1" max="10" class="w-20 p-2 border border-gray-300 rounded-lg text-center text-lg" value="6">
+                                        <span class="ml-3 text-gray-700">组</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">训练模式</label>
+                                <div class="radio-group">
+                                    <input type="radio" id="mode-single" name="trainingMode" value="single" class="radio-input hidden" checked>
+                                    <label for="mode-single" class="radio-label">一次判定</label>
+                                    
+                                    <input type="radio" id="mode-continuous" name="trainingMode" value="continuous" class="radio-input hidden">
+                                    <label for="mode-continuous" class="radio-label">连续打完</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end mt-8">
+                            <button id="start-training-setup-btn" class="btn-golf">
+                                开始训练 <i class="fa fa-play ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 训练记录页面 -->
+                <div id="training-record-page" class="page hidden">
+                    <div class="card-golf mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-primary">训练记录</h2>
+                            <button class="back-btn btn-golf-outline py-2 px-3 text-base">
+                                <i class="fa fa-arrow-left mr-1"></i> 返回
+                            </button>
+                        </div>
+                        
+                        <div id="current-group-info" class="bg-light p-4 rounded-lg mb-6">
+                            <h3 class="font-bold text-lg mb-2">当前进度</h3>
+                            <div class="flex justify-between">
+                                <div>
+                                    <span class="text-gray-700">当前组:</span>
+                                    <span id="current-group-number" class="font-bold text-primary ml-2">1</span>
+                                    <span class="text-gray-700">/</span>
+                                    <span id="total-group-number" class="font-bold text-primary">3</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-700">总球数:</span>
+                                    <span id="total-shot-count" class="font-bold text-primary ml-2">18</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form id="group-record-form">
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">本组达标成功球数</label>
+                                <div class="flex justify-center">
+                                    <div class="flex space-x-2">
+                                        <button type="button" id="decrease-success" class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                        <input type="number" id="successful-shots" min="0" max="6" value="0" class="w-20 h-12 text-center text-2xl font-bold border-2 border-primary rounded-lg">
+                                        <button type="button" id="increase-success" class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">失误类型</label>
+                                <select id="miss-type" class="w-full p-3 border-2 border-gray-200 rounded-lg text-lg">
+                                    <option value="">无失误</option>
+                                    <option value="打厚">打厚</option>
+                                    <option value="打薄">打薄</option>
+                                    <option value="距离偏大">距离偏大</option>
+                                    <option value="距离偏小">距离偏小</option>
+                                    <option value="方向左偏">方向左偏</option>
+                                    <option value="方向右偏">方向右偏</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 text-lg">备注</label>
+                                <textarea id="group-notes" class="w-full p-3 border-2 border-gray-200 rounded-lg text-lg" rows="3" placeholder="添加本次训练的备注..."></textarea>
+                            </div>
+                        </form>
+                        
+                        <div class="flex justify-between mt-8">
+                            <button id="save-group-btn" class="btn-golf-secondary">
+                                <i class="fa fa-save mr-2"></i> 保存本组
+                            </button>
+                            <button id="finish-training-btn" class="btn-golf">
+                                完成训练 <i class="fa fa-check ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 训练完成页面 -->
+                <div id="training-complete-page" class="page hidden">
+                    <div class="card-golf mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-primary">训练完成</h2>
+                            <button class="back-btn btn-golf-outline py-2 px-3 text-base">
+                                <i class="fa fa-arrow-left mr-1"></i> 返回
+                            </button>
+                        </div>
+                        
+                        <div class="text-center mb-6">
+                            <div class="inline-block p-4 rounded-full bg-green-100 mb-4">
+                                <i class="fa fa-check-circle text-5xl text-primary"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-primary">恭喜你完成了今天的训练！</h3>
+                        </div>
+                        
+                        <div class="bg-light p-4 rounded-lg mb-6">
+                            <h3 class="font-bold text-lg mb-2">训练统计</h3>
+                            <div id="training-stats" class="space-y-2">
+                                <!-- 由JS动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center mt-8">
+                            <button id="view-details-btn" class="btn-golf-secondary mr-4">
+                                <i class="fa fa-eye mr-2"></i> 查看详情
+                            </button>
+                            <button id="back-to-home-btn" class="btn-golf">
+                                <i class="fa fa-home mr-2"></i> 返回首页
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 历史记录页面 -->
+                <div id="history-page" class="page hidden">
+                    <div class="card-golf mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-primary">历史记录</h2>
+                            <button class="back-btn btn-golf-outline py-2 px-3 text-base">
+                                <i class="fa fa-arrow-left mr-1"></i> 返回
+                            </button>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">训练记录列表</h3>
+                                <select id="history-filter" class="p-2 border border-gray-300 rounded-lg">
+                                    <option value="all">全部记录</option>
+                                    <option value="thisWeek">本周</option>
+                                    <option value="thisMonth">本月</option>
+                                </select>
+                            </div>
+                            
+                            <div id="history-list" class="space-y-4">
+                                <!-- 由JS动态生成 -->
+                                <div class="text-center text-gray-500 py-8">
+                                    暂无训练记录
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 历史记录详情页面 -->
+                <div id="history-detail-page" class="page hidden">
+                    <div class="card-golf mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-primary">训练详情</h2>
+                            <button class="back-btn btn-golf-outline py-2 px-3 text-base">
+                                <i class="fa fa-arrow-left mr-1"></i> 返回
+                            </button>
+                        </div>
+                        
+                        <div id="history-detail-content">
+                            <!-- 由JS动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据统计页面 -->
+                <div id="statistics-page" class="page hidden">
+                    <div class="card-golf mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-primary">数据统计</h2>
+                            <button class="back-btn btn-golf-outline py-2 px-3 text-base">
+                                <i class="fa fa-arrow-left mr-1"></i> 返回
+                            </button>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <div class="flex mb-4">
+                                <button class="tab-button active" data-tab="daily">每日统计</button>
+                                <button class="tab-button" data-tab="weekly">每周汇总</button>
+                                <button class="tab-button" data-tab="timeline">训练时间线</button>
+                                <button class="tab-button" data-tab="club">球杆统计</button>
+                            </div>
+                            <div class="flex justify-end mt-2">
+                                <button id="export-data-btn" class="btn-golf-outline py-2 px-3 text-sm">
+                                    <i class="fa fa-download mr-1"></i> 导出数据
+                                </button>
+                            </div>
+                            
+                            <div id="statistics-content">
+                                <!-- 由JS动态生成 -->
+                                <div class="text-center text-gray-500 py-8">
+                                    暂无统计数据
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 训练模板页面 -->
+                <div id="templates-page" class="page hidden">
+                    <div class="card-golf mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-primary">训练模板</h2>
+                            <button class="back-btn btn-golf-outline py-2 px-3 text-base">
+                                <i class="fa fa-arrow-left mr-1"></i> 返回
+                            </button>
+                        </div>
+                        
+                        <div id="templates-list" class="space-y-4 mb-6">
+                            <!-- 由JS动态生成 -->
+                            <div class="text-center text-gray-500 py-8">
+                                暂无保存的模板
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center">
+                            <button id="clear-templates-btn" class="btn-golf-outline mr-4">
+                                <i class="fa fa-trash mr-2"></i> 清空模板
+                            </button>
+                            <button id="create-new-template-btn" class="btn-golf">
+                                <i class="fa fa-plus mr-2"></i> 新建模板
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 保存模板弹窗 -->
+                <div id="save-template-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white rounded-xl p-6 w-11/12 max-w-md">
+                        <h3 class="text-2xl font-bold text-primary mb-4">保存训练模板</h3>
+                        
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-bold mb-2">模板名称</label>
+                            <input type="text" id="template-name" class="w-full p-3 border-2 border-gray-200 rounded-lg" placeholder="输入模板名称">
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button id="cancel-save-template-btn" class="btn-golf-outline mr-4">
+                                取消
+                            </button>
+                            <button id="confirm-save-template-btn" class="btn-golf">
+                                保存
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="text-center text-white text-shadow mt-8">
+            <p>高尔夫短杆训练记录应用 &copy; 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentPage = 'home-page';
+        let currentStep = 1;
+        let currentGroup = 1;
+        let totalGroups = 1;
+        let trainingData = {
+            courseJudgment: {},
+            trainingDetails: [],
+            statistics: {
+                totalShots: 0,
+                totalSuccessfulShots: 0,
+                successRate: 0,
+                shotTypeCounts: {
+                    "切滚球": 0,
+                    "劈起球": 0
+                }
+            }
+        };
+        let templates = [];
+        let trainingHistory = [];
+
+        // DOM 加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化数据
+            initData();
+            
+            // 初始化页面
+            initPages();
+            
+            // 绑定事件
+            bindEvents();
+            
+            // 更新今日概览
+            updateTodaySummary();
+        });
+
+        // 初始化数据
+        function initData() {
+            // 从 localStorage 加载数据
+            const savedTemplates = localStorage.getItem('golfTemplates');
+            const savedHistory = localStorage.getItem('golfTrainingHistory');
+            
+            if (savedTemplates) {
+                templates = JSON.parse(savedTemplates);
+            }
+            
+            if (savedHistory) {
+                trainingHistory = JSON.parse(savedHistory);
+            }
+        }
+
+        // 初始化页面
+        function initPages() {
+            // 生成到旗杆距离选项
+            const distanceToPinGroup = document.getElementById('distance-to-pin-group');
+            for (let i = 15; i <= 70; i += 5) {
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.id = `distance-${i}`;
+                input.name = 'distanceToPin';
+                input.value = i;
+                input.className = 'radio-input hidden';
+                input.checked = i === 30; // 默认选择30码
+                
+                const label = document.createElement('label');
+                label.htmlFor = `distance-${i}`;
+                label.className = 'radio-label';
+                label.textContent = `${i}码`;
+                
+                distanceToPinGroup.appendChild(input);
+                distanceToPinGroup.appendChild(label);
+            }
+            
+            // 生成球杆选择选项
+            const clubGroup = document.getElementById('club-group');
+            const clubs = ['8铁', '9铁', 'P杆', '48度', '50度', '52度', '54度', '56度', '58度', '60度'];
+            clubs.forEach((club, index) => {
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.id = `club-${club}`;
+                input.name = 'club';
+                input.value = club;
+                input.className = 'radio-input hidden';
+                input.checked = club === '56度'; // 默认选择56度
+                
+                const label = document.createElement('label');
+                label.htmlFor = `club-${club}`;
+                label.className = 'radio-label';
+                label.textContent = club;
+                
+                clubGroup.appendChild(input);
+                clubGroup.appendChild(label);
+            });
+            
+            // 生成落点距离选项
+            updateLandingDistanceOptions(30); // 默认30码
+            
+            // 监听到旗杆距离变化，更新落点距离选项
+            document.querySelectorAll('input[name="distanceToPin"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    updateLandingDistanceOptions(parseInt(this.value));
+                });
+            });
+        }
+
+        // 更新落点距离选项
+        function updateLandingDistanceOptions(maxDistance) {
+            const landingDistanceGroup = document.getElementById('landing-distance-group');
+            landingDistanceGroup.innerHTML = '';
+            
+            for (let i = 5; i <= maxDistance; i += 5) {
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.id = `landing-${i}`;
+                input.name = 'landingDistance';
+                input.value = i;
+                input.className = 'radio-input hidden';
+                input.checked = i === Math.min(maxDistance, 15); // 默认选择不超过15码
+                
+                const label = document.createElement('label');
+                label.htmlFor = `landing-${i}`;
+                label.className = 'radio-label';
+                label.textContent = `${i}码`;
+                
+                landingDistanceGroup.appendChild(input);
+                landingDistanceGroup.appendChild(label);
+            }
+        }
+
+        // 绑定事件
+        function bindEvents() {
+            // 导航菜单按钮
+            document.getElementById('start-training-btn').addEventListener('click', () => showPage('course-judgment-page'));
+            document.getElementById('history-btn').addEventListener('click', () => {
+                showPage('history-page');
+                loadHistoryRecords();
+            });
+            document.getElementById('statistics-btn').addEventListener('click', () => {
+                showPage('statistics-page');
+                loadStatistics();
+            });
+            document.getElementById('templates-btn').addEventListener('click', () => {
+                showPage('templates-page');
+                loadTemplates();
+            });
+            
+            // 返回按钮
+            document.querySelectorAll('.back-btn').forEach(btn => {
+                btn.addEventListener('click', () => showPage('home-page'));
+            });
+            
+            // 果岭研判页面
+            document.getElementById('next-to-process-btn').addEventListener('click', validateCourseJudgment);
+            document.getElementById('save-template-btn').addEventListener('click', showSaveTemplateModal);
+            
+            // 击球流程页面
+            document.getElementById('prev-step-btn').addEventListener('click', goToPrevStep);
+            document.getElementById('next-step-btn').addEventListener('click', goToNextStep);
+            
+            // 训练设置页面
+            document.getElementById('start-training-setup-btn').addEventListener('click', startTraining);
+            
+            // 自定义组数输入
+            document.getElementById('groups-custom').addEventListener('change', function() {
+                document.getElementById('custom-group-input').classList.remove('hidden');
+            });
+            
+            document.querySelectorAll('input[name="groupCount"]').forEach(radio => {
+                if (radio.id !== 'groups-custom') {
+                    radio.addEventListener('change', function() {
+                        document.getElementById('custom-group-input').classList.add('hidden');
+                    });
+                }
+            });
+            
+            // 训练记录页面
+            document.getElementById('decrease-success').addEventListener('click', decreaseSuccessShots);
+            document.getElementById('increase-success').addEventListener('click', increaseSuccessShots);
+            document.getElementById('save-group-btn').addEventListener('click', saveGroupRecord);
+            document.getElementById('finish-training-btn').addEventListener('click', finishTraining);
+            
+            // 训练完成页面
+            document.getElementById('view-details-btn').addEventListener('click', viewTrainingDetails);
+            document.getElementById('back-to-home-btn').addEventListener('click', () => showPage('home-page'));
+            
+            // 历史记录页面
+            document.getElementById('history-filter').addEventListener('change', loadHistoryRecords);
+            
+            // 数据统计页面
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    loadStatistics(this.dataset.tab);
+                });
+            });
+            
+            // 导出数据按钮
+            document.getElementById('export-data-btn').addEventListener('click', exportTrainingData);
+            
+            // 训练模板页面
+            document.getElementById('clear-templates-btn').addEventListener('click', clearTemplates);
+            document.getElementById('create-new-template-btn').addEventListener('click', () => showPage('course-judgment-page'));
+            
+            // 保存模板弹窗
+            document.getElementById('cancel-save-template-btn').addEventListener('click', hideSaveTemplateModal);
+            document.getElementById('confirm-save-template-btn').addEventListener('click', saveTemplate);
+        }
+
+        // 显示页面
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            document.getElementById(pageId).classList.remove('hidden');
+            currentPage = pageId;
+        }
+
+        // 验证果岭研判表单
+        function validateCourseJudgment() {
+            const distanceToPin = parseInt(document.querySelector('input[name="distanceToPin"]:checked').value);
+            const landingDistance = parseInt(document.querySelector('input[name="landingDistance"]:checked').value);
+            
+            if (landingDistance > distanceToPin) {
+                document.getElementById('distance-warning').classList.remove('hidden');
+                return;
+            }
+            
+            document.getElementById('distance-warning').classList.add('hidden');
+            
+            // 保存果岭研判数据
+            trainingData.courseJudgment = {
+                distanceToPin: distanceToPin,
+                slope: document.querySelector('input[name="slope"]:checked').value,
+                leftRightLevel: document.querySelector('input[name="leftRightLevel"]:checked').value,
+                frontObstacle: document.querySelector('input[name="frontObstacle"]:checked').value,
+                shotType: document.querySelector('input[name="shotType"]:checked').value,
+                club: document.querySelector('input[name="club"]:checked').value,
+                landingDistance: landingDistance
+            };
+            
+            // 重置步骤
+            currentStep = 1;
+            resetProcessSteps();
+            
+            // 显示击球流程页面
+            showPage('shot-process-page');
+        }
+
+        // 重置击球流程步骤
+        function resetProcessSteps() {
+            document.querySelectorAll('.step-item').forEach(item => {
+                item.classList.remove('active', 'completed');
+                item.querySelector('.step-status i').className = 'fa fa-circle-o text-2xl text-gray-300';
+                item.querySelector('.w-10').className = 'w-10 h-10 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold mr-4';
+            });
+            
+            const firstStep = document.querySelector('.step-item[data-step="1"]');
+            firstStep.classList.add('active');
+            firstStep.querySelector('.w-10').className = 'w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mr-4';
+            
+            document.getElementById('prev-step-btn').disabled = true;
+            document.getElementById('next-step-btn').textContent = '下一步 ';
+            document.getElementById('next-step-btn').innerHTML = '下一步 <i class="fa fa-arrow-right ml-2"></i>';
+        }
+
+        // 上一步
+        function goToPrevStep() {
+            if (currentStep > 1) {
+                const currentStepElement = document.querySelector(`.step-item[data-step="${currentStep}"]`);
+                currentStepElement.classList.remove('active');
+                currentStepElement.classList.add('completed');
+                currentStepElement.querySelector('.step-status i').className = 'fa fa-check-circle text-2xl text-primary';
+                
+                currentStep--;
+                
+                const prevStepElement = document.querySelector(`.step-item[data-step="${currentStep}"]`);
+                prevStepElement.classList.remove('completed');
+                prevStepElement.classList.add('active');
+                prevStepElement.querySelector('.w-10').className = 'w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mr-4';
+                
+                document.getElementById('prev-step-btn').disabled = currentStep === 1;
+                document.getElementById('next-step-btn').textContent = '下一步 ';
+                document.getElementById('next-step-btn').innerHTML = '下一步 <i class="fa fa-arrow-right ml-2"></i>';
+            }
+        }
+
+        // 下一步
+        function goToNextStep() {
+            if (currentStep < 6) {
+                const currentStepElement = document.querySelector(`.step-item[data-step="${currentStep}"]`);
+                currentStepElement.classList.remove('active');
+                currentStepElement.classList.add('completed');
+                currentStepElement.querySelector('.step-status i').className = 'fa fa-check-circle text-2xl text-primary';
+                
+                currentStep++;
+                
+                const nextStepElement = document.querySelector(`.step-item[data-step="${currentStep}"]`);
+                nextStepElement.classList.add('active');
+                nextStepElement.querySelector('.w-10').className = 'w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mr-4';
+                
+                document.getElementById('prev-step-btn').disabled = false;
+                
+                if (currentStep === 6) {
+                    document.getElementById('next-step-btn').textContent = '完成 ';
+                    document.getElementById('next-step-btn').innerHTML = '完成 <i class="fa fa-check ml-2"></i>';
+                }
+            } else {
+                // 完成所有步骤，显示训练设置页面
+                showTrainingInfo();
+                showPage('training-setup-page');
+            }
+        }
+
+        // 显示训练信息
+        function showTrainingInfo() {
+            const trainingInfo = document.getElementById('training-info');
+            const judgment = trainingData.courseJudgment;
+            
+            trainingInfo.innerHTML = `
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <span class="text-gray-600">到旗杆距离:</span>
+                        <span class="font-bold ml-2">${judgment.distanceToPin}码</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">落点距离:</span>
+                        <span class="font-bold ml-2">${judgment.landingDistance}码</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">打法:</span>
+                        <span class="font-bold ml-2">${judgment.shotType}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">球杆:</span>
+                        <span class="font-bold ml-2">${judgment.club}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">地形:</span>
+                        <span class="font-bold ml-2">${judgment.slope}, ${judgment.leftRightLevel}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">障碍:</span>
+                        <span class="font-bold ml-2">${judgment.frontObstacle}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 开始训练
+        function startTraining() {
+            // 获取训练组数
+            const groupCountRadio = document.querySelector('input[name="groupCount"]:checked');
+            if (groupCountRadio.value === 'custom') {
+                totalGroups = parseInt(document.getElementById('custom-group-count').value) || 1;
+            } else {
+                totalGroups = parseInt(groupCountRadio.value);
+            }
+            
+            // 重置训练数据
+            currentGroup = 1;
+            trainingData.trainingDetails = [];
+            trainingData.statistics = {
+                totalShots: totalGroups * 6,
+                totalSuccessfulShots: 0,
+                successRate: 0,
+                shotTypeCounts: {
+                    "切滚球": 0,
+                    "劈起球": 0
+                }
+            };
+            
+            // 更新统计数据中的打法计数
+            trainingData.statistics.shotTypeCounts[trainingData.courseJudgment.shotType] = totalGroups * 6;
+            
+            // 更新当前组信息
+            updateCurrentGroupInfo();
+            
+            // 重置表单
+            document.getElementById('successful-shots').value = 0;
+            document.getElementById('miss-type').value = '';
+            document.getElementById('group-notes').value = '';
+            
+            // 显示训练记录页面
+            showPage('training-record-page');
+        }
+
+        // 更新当前组信息
+        function updateCurrentGroupInfo() {
+            document.getElementById('current-group-number').textContent = currentGroup;
+            document.getElementById('total-group-number').textContent = totalGroups;
+            document.getElementById('total-shot-count').textContent = totalGroups * 6;
+        }
+
+        // 减少成功球数
+        function decreaseSuccessShots() {
+            const successInput = document.getElementById('successful-shots');
+            let currentValue = parseInt(successInput.value);
+            if (currentValue > 0) {
+                successInput.value = currentValue - 1;
+            }
+        }
+
+        // 增加成功球数
+        function increaseSuccessShots() {
+            const successInput = document.getElementById('successful-shots');
+            let currentValue = parseInt(successInput.value);
+            if (currentValue < 6) {
+                successInput.value = currentValue + 1;
+            }
+        }
+
+        // 保存本组记录
+        function saveGroupRecord() {
+            const successfulShots = parseInt(document.getElementById('successful-shots').value);
+            const missType = document.getElementById('miss-type').value;
+            const notes = document.getElementById('group-notes').value;
+            
+            // 保存本组数据
+            trainingData.trainingDetails.push({
+                groupNumber: currentGroup,
+                successfulShots: successfulShots,
+                missType: missType,
+                notes: notes
+            });
+            
+            // 更新统计数据
+            trainingData.statistics.totalSuccessfulShots += successfulShots;
+            
+            // 检查是否还有下一组
+            if (currentGroup < totalGroups) {
+                currentGroup++;
+                
+                // 更新当前组信息
+                updateCurrentGroupInfo();
+                
+                // 重置表单
+                document.getElementById('successful-shots').value = 0;
+                document.getElementById('miss-type').value = '';
+                document.getElementById('group-notes').value = '';
+            } else {
+                // 计算总成功率
+                trainingData.statistics.successRate = (trainingData.statistics.totalSuccessfulShots / trainingData.statistics.totalShots * 100).toFixed(1);
+                
+                // 保存训练记录
+                saveTrainingRecord();
+                
+                // 显示训练完成页面
+                showTrainingComplete();
+            }
+        }
+
+        // 完成训练
+        function finishTraining() {
+            // 确认是否保存当前组
+            if (confirm('是否保存当前组记录并完成训练？')) {
+                saveGroupRecord();
+            }
+        }
+
+        // 保存训练记录
+        function saveTrainingRecord() {
+            // 添加日期和ID
+            const today = new Date();
+            const record = {
+                id: Date.now().toString(),
+                date: today.toISOString().split('T')[0],
+                courseJudgment: trainingData.courseJudgment,
+                trainingDetails: trainingData.trainingDetails,
+                statistics: trainingData.statistics
+            };
+            
+            // 添加到历史记录
+            trainingHistory.push(record);
+            
+            // 保存到 localStorage
+            localStorage.setItem('golfTrainingHistory', JSON.stringify(trainingHistory));
+            
+            // 更新今日概览
+            updateTodaySummary();
+        }
+
+        // 显示训练完成页面
+        function showTrainingComplete() {
+            const trainingStats = document.getElementById('training-stats');
+            const stats = trainingData.statistics;
+            
+            trainingStats.innerHTML = `
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <span class="text-gray-600">总球数:</span>
+                        <span class="font-bold ml-2">${stats.totalShots}球</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">成功球数:</span>
+                        <span class="font-bold ml-2">${stats.totalSuccessfulShots}球</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">总成功率:</span>
+                        <span class="font-bold ml-2">${stats.successRate}%</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">训练组数:</span>
+                        <span class="font-bold ml-2">${totalGroups}组</span>
+                    </div>
+                </div>
+            `;
+            
+            showPage('training-complete-page');
+        }
+
+        // 查看训练详情
+        function viewTrainingDetails() {
+            showHistoryDetail(trainingHistory[trainingHistory.length - 1].id);
+        }
+
+        // 更新今日概览
+        function updateTodaySummary() {
+            const todaySummary = document.getElementById('today-summary');
+            const today = new Date().toISOString().split('T')[0];
+            
+            // 查找今日记录
+            const todayRecords = trainingHistory.filter(record => record.date === today);
+            
+            if (todayRecords.length === 0) {
+                todaySummary.innerHTML = '<p>今天还没有训练记录，点击"开始训练"开始你的短杆练习。</p>';
+                return;
+            }
+            
+            // 计算今日统计
+            let totalShots = 0;
+            let totalSuccessfulShots = 0;
+            let chipShots = 0;
+            let pitchShots = 0;
+            
+            todayRecords.forEach(record => {
+                totalShots += record.statistics.totalShots;
+                totalSuccessfulShots += record.statistics.totalSuccessfulShots;
+                chipShots += record.statistics.shotTypeCounts["切滚球"] || 0;
+                pitchShots += record.statistics.shotTypeCounts["劈起球"] || 0;
+            });
+            
+            const successRate = totalShots > 0 ? (totalSuccessfulShots / totalShots * 100).toFixed(1) : 0;
+            
+            todaySummary.innerHTML = `
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <span class="text-gray-600">今日总球数:</span>
+                        <span class="font-bold ml-2">${totalShots}球</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">平均成功率:</span>
+                        <span class="font-bold ml-2">${successRate}%</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">切滚球训练:</span>
+                        <span class="font-bold ml-2">${chipShots}球</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">劈起球训练:</span>
+                        <span class="font-bold ml-2">${pitchShots}球</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 加载历史记录
+        function loadHistoryRecords() {
+            const historyList = document.getElementById('history-list');
+            const filter = document.getElementById('history-filter').value;
+            
+            // 获取过滤后的记录
+            let filteredRecords = [...trainingHistory];
+            
+            if (filter === 'thisWeek') {
+                const today = new Date();
+                const weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - today.getDay());
+                weekStart.setHours(0, 0, 0, 0);
+                
+                filteredRecords = trainingHistory.filter(record => {
+                    const recordDate = new Date(record.date);
+                    return recordDate >= weekStart;
+                });
+            } else if (filter === 'thisMonth') {
+                const today = new Date();
+                const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                
+                filteredRecords = trainingHistory.filter(record => {
+                    const recordDate = new Date(record.date);
+                    return recordDate >= monthStart;
+                });
+            }
+            
+            // 按日期降序排序
+            filteredRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (filteredRecords.length === 0) {
+                historyList.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        暂无训练记录
+                    </div>
+                `;
+                return;
+            }
+            
+            // 生成历史记录列表
+            let html = '';
+            filteredRecords.forEach(record => {
+                const date = new Date(record.date);
+                const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+                
+                html += `
+                    <div class="bg-white rounded-lg shadow p-4 cursor-pointer hover:bg-light transition-all-300" onclick="showHistoryDetail('${record.id}')">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-lg">${formattedDate} 训练记录</h4>
+                            <span class="bg-primary text-white px-2 py-1 rounded-full text-sm">${record.statistics.successRate}%</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mt-2 text-sm">
+                            <div>
+                                <span class="text-gray-600">总球数:</span>
+                                <span class="font-bold ml-1">${record.statistics.totalShots}球</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">打法:</span>
+                                <span class="font-bold ml-1">${record.courseJudgment.shotType}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">球杆:</span>
+                                <span class="font-bold ml-1">${record.courseJudgment.club}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">距离:</span>
+                                <span class="font-bold ml-1">${record.courseJudgment.distanceToPin}码</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            historyList.innerHTML = html;
+        }
+
+        // 显示历史记录详情
+        function showHistoryDetail(recordId) {
+            const record = trainingHistory.find(r => r.id === recordId);
+            
+            if (!record) {
+                alert('未找到训练记录');
+                return;
+            }
+            
+            const historyDetailContent = document.getElementById('history-detail-content');
+            const date = new Date(record.date);
+            const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            
+            // 生成详情HTML
+            let html = `
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-primary mb-2">${formattedDate} 训练记录</h3>
+                    <div class="bg-light p-4 rounded-lg">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-gray-600">总球数:</span>
+                                <span class="font-bold ml-2">${record.statistics.totalShots}球</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">成功球数:</span>
+                                <span class="font-bold ml-2">${record.statistics.totalSuccessfulShots}球</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">总成功率:</span>
+                                <span class="font-bold ml-2">${record.statistics.successRate}%</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">训练组数:</span>
+                                <span class="font-bold ml-2">${record.trainingDetails.length}组</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-primary mb-2">果岭研判</h3>
+                    <div class="bg-light p-4 rounded-lg">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-gray-600">到旗杆距离:</span>
+                                <span class="font-bold ml-2">${record.courseJudgment.distanceToPin}码</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">落点距离:</span>
+                                <span class="font-bold ml-2">${record.courseJudgment.landingDistance}码</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">打法:</span>
+                                <span class="font-bold ml-2">${record.courseJudgment.shotType}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">球杆:</span>
+                                <span class="font-bold ml-2">${record.courseJudgment.club}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">地形:</span>
+                                <span class="font-bold ml-2">${record.courseJudgment.slope}, ${record.courseJudgment.leftRightLevel}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">障碍:</span>
+                                <span class="font-bold ml-2">${record.courseJudgment.frontObstacle}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-primary mb-2">每组记录</h3>
+                    <div class="space-y-4">
+            `;
+            
+            // 添加每组记录
+            record.trainingDetails.forEach(group => {
+                html += `
+                    <div class="bg-light p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold">第 ${group.groupNumber} 组</h4>
+                            <span class="bg-primary text-white px-2 py-1 rounded-full text-sm">${(group.successfulShots / 6 * 100).toFixed(0)}%</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-gray-600">成功球数:</span>
+                                <span class="font-bold ml-2">${group.successfulShots}/6球</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">失误类型:</span>
+                                <span class="font-bold ml-2">${group.missType || '无'}</span>
+                            </div>
+                        </div>
+                        ${group.notes ? `<div class="mt-2"><span class="text-gray-600">备注:</span><p class="font-bold mt-1">${group.notes}</p></div>` : ''}
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            historyDetailContent.innerHTML = html;
+            showPage('history-detail-page');
+        }
+
+        // 加载统计数据
+        function loadStatistics(tab = 'daily') {
+            const statisticsContent = document.getElementById('statistics-content');
+            
+            if (trainingHistory.length === 0) {
+                statisticsContent.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        暂无统计数据
+                    </div>
+                `;
+                return;
+            }
+            
+            if (tab === 'daily') {
+                loadDailyStatistics();
+            } else if (tab === 'weekly') {
+                loadWeeklyStatistics();
+            } else if (tab === 'timeline') {
+                loadTimelineStatistics();
+            } else if (tab === 'club') {
+                loadClubStatistics();
+            }
+        }
+
+        // 加载每日统计
+        function loadDailyStatistics() {
+            const statisticsContent = document.getElementById('statistics-content');
+            
+            // 获取最近7天的数据
+            const today = new Date();
+            const dates = [];
+            const successRates = [];
+            const shotCounts = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dateString = date.toISOString().split('T')[0];
+                dates.push(dateString);
+                
+                // 查找当天的记录
+                const dayRecords = trainingHistory.filter(record => record.date === dateString);
+                
+                if (dayRecords.length === 0) {
+                    successRates.push(0);
+                    shotCounts.push(0);
+                } else {
+                    let totalShots = 0;
+                    let totalSuccessfulShots = 0;
+                    
+                    dayRecords.forEach(record => {
+                        totalShots += record.statistics.totalShots;
+                        totalSuccessfulShots += record.statistics.totalSuccessfulShots;
+                    });
+                    
+                    const successRate = totalShots > 0 ? (totalSuccessfulShots / totalShots * 100).toFixed(1) : 0;
+                    successRates.push(parseFloat(successRate));
+                    shotCounts.push(totalShots);
+                }
+            }
+            
+            // 生成图表
+            statisticsContent.innerHTML = `
+                <div class="mb-6">
+                    <h3 class="font-bold text-lg mb-4">最近7天训练情况</h3>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <canvas id="daily-chart" height="250"></canvas>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-light p-4 rounded-lg">
+                        <h4 class="font-bold mb-2">总训练数据</h4>
+                        <div class="space-y-2">
+                            <div>
+                                <span class="text-gray-600">总训练次数:</span>
+                                <span class="font-bold ml-2">${trainingHistory.length}次</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">总训练球数:</span>
+                                <span class="font-bold ml-2">${trainingHistory.reduce((sum, record) => sum + record.statistics.totalShots, 0)}球</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">平均成功率:</span>
+                                <span class="font-bold ml-2">${(trainingHistory.reduce((sum, record) => sum + parseFloat(record.statistics.successRate), 0) / trainingHistory.length).toFixed(1)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-light p-4 rounded-lg">
+                        <h4 class="font-bold mb-2">打法分布</h4>
+                        <div class="space-y-2">
+                            <div>
+                                <span class="text-gray-600">切滚球训练:</span>
+                                <span class="font-bold ml-2">${trainingHistory.reduce((sum, record) => sum + (record.statistics.shotTypeCounts["切滚球"] || 0), 0)}球</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">劈起球训练:</span>
+                                <span class="font-bold ml-2">${trainingHistory.reduce((sum, record) => sum + (record.statistics.shotTypeCounts["劈起球"] || 0), 0)}球</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 创建图表
+            setTimeout(() => {
+                const ctx = document.getElementById('daily-chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: dates.map(date => {
+                            const d = new Date(date);
+                            return `${d.getMonth() + 1}/${d.getDate()}`;
+                        }),
+                        datasets: [
+                            {
+                                label: '成功率 (%)',
+                                data: successRates,
+                                backgroundColor: 'rgba(46, 125, 50, 0.7)',
+                                borderColor: 'rgba(46, 125, 50, 1)',
+                                borderWidth: 1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '训练球数',
+                                data: shotCounts,
+                                backgroundColor: 'rgba(76, 175, 80, 0.4)',
+                                borderColor: 'rgba(76, 175, 80, 1)',
+                                borderWidth: 1,
+                                type: 'line',
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: '成功率 (%)'
+                                }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                position: 'right',
+                                grid: {
+                                    drawOnChartArea: false
+                                },
+                                title: {
+                                    display: true,
+                                    text: '训练球数'
+                                }
+                            }
+                        }
+                    }
+                });
+            }, 100);
+        }
+
+        // 加载每周统计
+        function loadWeeklyStatistics() {
+            const statisticsContent = document.getElementById('statistics-content');
+            
+            // 按周分组数据
+            const weeklyData = {};
+            
+            trainingHistory.forEach(record => {
+                const date = new Date(record.date);
+                const weekStart = new Date(date);
+                weekStart.setDate(date.getDate() - date.getDay());
+                weekStart.setHours(0, 0, 0, 0);
+                const weekKey = weekStart.toISOString().split('T')[0];
+                
+                if (!weeklyData[weekKey]) {
+                    weeklyData[weekKey] = {
+                        totalShots: 0,
+                        totalSuccessfulShots: 0,
+                        trainingCount: 0
+                    };
+                }
+                
+                weeklyData[weekKey].totalShots += record.statistics.totalShots;
+                weeklyData[weekKey].totalSuccessfulShots += record.statistics.totalSuccessfulShots;
+                weeklyData[weekKey].trainingCount += 1;
+            });
+            
+            // 转换为数组并排序
+            const weeks = Object.keys(weeklyData).sort();
+            const weeklyStats = weeks.map(week => {
+                const data = weeklyData[week];
+                return {
+                    week: week,
+                    totalShots: data.totalShots,
+                    totalSuccessfulShots: data.totalSuccessfulShots,
+                    successRate: data.totalShots > 0 ? (data.totalSuccessfulShots / data.totalShots * 100).toFixed(1) : 0,
+                    trainingCount: data.trainingCount
+                };
+            });
+            
+            // 生成HTML
+            let html = `
+                <div class="mb-6">
+                    <h3 class="font-bold text-lg mb-4">每周训练汇总</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full bg-white rounded-lg shadow">
+                            <thead>
+                                <tr class="bg-primary text-white">
+                                    <th class="py-3 px-4 text-left">周次</th>
+                                    <th class="py-3 px-4 text-center">训练次数</th>
+                                    <th class="py-3 px-4 text-center">训练球数</th>
+                                    <th class="py-3 px-4 text-center">成功率</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            weeklyStats.forEach(stat => {
+                const weekStart = new Date(stat.week);
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                
+                const weekRange = `${weekStart.getMonth() + 1}/${weekStart.getDate()} - ${weekEnd.getMonth() + 1}/${weekEnd.getDate()}`;
+                
+                html += `
+                    <tr class="border-b border-gray-200 hover:bg-light">
+                        <td class="py-3 px-4">${weekRange}</td>
+                        <td class="py-3 px-4 text-center">${stat.trainingCount}次</td>
+                        <td class="py-3 px-4 text-center">${stat.totalShots}球</td>
+                        <td class="py-3 px-4 text-center">${stat.successRate}%</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="bg-light p-4 rounded-lg">
+                    <h4 class="font-bold mb-2">进步趋势</h4>
+                    <div class="space-y-2">
+                        <div>
+                            <span class="text-gray-600">最近一周训练:</span>
+                            <span class="font-bold ml-2">${weeklyStats.length > 0 ? weeklyStats[weeklyStats.length - 1].trainingCount : 0}次</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">最近一周成功率:</span>
+                            <span class="font-bold ml-2">${weeklyStats.length > 0 ? weeklyStats[weeklyStats.length - 1].successRate : 0}%</span>
+                        </div>
+                        ${weeklyStats.length > 1 ? `
+                        <div>
+                            <span class="text-gray-600">环比变化:</span>
+                            <span class="font-bold ml-2 ${parseFloat(weeklyStats[weeklyStats.length - 1].successRate) >= parseFloat(weeklyStats[weeklyStats.length - 2].successRate) ? 'text-primary' : 'text-danger'}">
+                                ${(parseFloat(weeklyStats[weeklyStats.length - 1].successRate) - parseFloat(weeklyStats[weeklyStats.length - 2].successRate)).toFixed(1)}%
+                            </span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            statisticsContent.innerHTML = html;
+        }
+
+        // 加载球杆统计
+        function loadClubStatistics() {
+            const statisticsContent = document.getElementById('statistics-content');
+            
+            // 按球杆分组数据
+            const clubData = {};
+            
+            trainingHistory.forEach(record => {
+                const club = record.courseJudgment.club;
+                
+                if (!clubData[club]) {
+                    clubData[club] = {
+                        totalShots: 0,
+                        totalSuccessfulShots: 0,
+                        trainingCount: 0
+                    };
+                }
+                
+                clubData[club].totalShots += record.statistics.totalShots;
+                clubData[club].totalSuccessfulShots += record.statistics.totalSuccessfulShots;
+                clubData[club].trainingCount += 1;
+            });
+            
+            // 转换为数组并排序
+            const clubs = Object.keys(clubData).sort();
+            const clubStats = clubs.map(club => {
+                const data = clubData[club];
+                return {
+                    club: club,
+                    totalShots: data.totalShots,
+                    totalSuccessfulShots: data.totalSuccessfulShots,
+                    successRate: data.totalShots > 0 ? (data.totalSuccessfulShots / data.totalShots * 100).toFixed(1) : 0,
+                    trainingCount: data.trainingCount
+                };
+            });
+            
+            // 生成HTML
+            let html = `
+                <div class="mb-6">
+                    <h3 class="font-bold text-lg mb-4">球杆使用统计</h3>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <canvas id="club-chart" height="250"></canvas>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="font-bold text-lg mb-4">球杆详细数据</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full bg-white rounded-lg shadow">
+                            <thead>
+                                <tr class="bg-primary text-white">
+                                    <th class="py-3 px-4 text-left">球杆</th>
+                                    <th class="py-3 px-4 text-center">训练次数</th>
+                                    <th class="py-3 px-4 text-center">训练球数</th>
+                                    <th class="py-3 px-4 text-center">成功率</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            clubStats.forEach(stat => {
+                html += `
+                    <tr class="border-b border-gray-200 hover:bg-light">
+                        <td class="py-3 px-4">${stat.club}</td>
+                        <td class="py-3 px-4 text-center">${stat.trainingCount}次</td>
+                        <td class="py-3 px-4 text-center">${stat.totalShots}球</td>
+                        <td class="py-3 px-4 text-center">${stat.successRate}%</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            statisticsContent.innerHTML = html;
+            
+            // 创建图表
+            setTimeout(() => {
+                const ctx = document.getElementById('club-chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: clubStats.map(stat => stat.club),
+                        datasets: [
+                            {
+                                label: '训练球数',
+                                data: clubStats.map(stat => stat.totalShots),
+                                backgroundColor: 'rgba(46, 125, 50, 0.2)',
+                                borderColor: 'rgba(46, 125, 50, 1)',
+                                borderWidth: 2,
+                                pointBackgroundColor: 'rgba(46, 125, 50, 1)'
+                            },
+                            {
+                                label: '成功率 (%)',
+                                data: clubStats.map(stat => parseFloat(stat.successRate)),
+                                backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                                borderColor: 'rgba(33, 150, 243, 1)',
+                                borderWidth: 2,
+                                pointBackgroundColor: 'rgba(33, 150, 243, 1)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            r: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }, 100);
+        }
+
+        // 加载模板
+        function loadTemplates() {
+            const templatesList = document.getElementById('templates-list');
+            
+            if (templates.length === 0) {
+                templatesList.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        暂无保存的模板
+                    </div>
+                `;
+                return;
+            }
+            
+            // 生成模板列表
+            let html = '';
+            templates.forEach(template => {
+                html += `
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-lg">${template.name}</h4>
+                            <div>
+                                <button class="text-primary hover:text-dark mr-3" onclick="applyTemplate('${template.id}')">
+                                    <i class="fa fa-check-circle text-xl"></i>
+                                </button>
+                                <button class="text-danger hover:text-red-700" onclick="deleteTemplate('${template.id}')">
+                                    <i class="fa fa-trash text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mt-2 text-sm">
+                            <div>
+                                <span class="text-gray-600">距离:</span>
+                                <span class="font-bold ml-1">${template.courseJudgment.distanceToPin}码</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">打法:</span>
+                                <span class="font-bold ml-1">${template.courseJudgment.shotType}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">球杆:</span>
+                                <span class="font-bold ml-1">${template.courseJudgment.club}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">地形:</span>
+                                <span class="font-bold ml-1">${template.courseJudgment.slope}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            templatesList.innerHTML = html;
+        }
+
+        // 显示保存模板弹窗
+        function showSaveTemplateModal() {
+            document.getElementById('save-template-modal').classList.remove('hidden');
+            document.getElementById('template-name').value = '';
+        }
+
+        // 隐藏保存模板弹窗
+        function hideSaveTemplateModal() {
+            document.getElementById('save-template-modal').classList.add('hidden');
+        }
+
+        // 保存模板
+        function saveTemplate() {
+            const templateName = document.getElementById('template-name').value.trim();
+            
+            if (!templateName) {
+                alert('请输入模板名称');
+                return;
+            }
+            
+            // 获取当前果岭研判数据
+            const courseJudgment = {
+                distanceToPin: parseInt(document.querySelector('input[name="distanceToPin"]:checked').value),
+                slope: document.querySelector('input[name="slope"]:checked').value,
+                leftRightLevel: document.querySelector('input[name="leftRightLevel"]:checked').value,
+                frontObstacle: document.querySelector('input[name="frontObstacle"]:checked').value,
+                shotType: document.querySelector('input[name="shotType"]:checked').value,
+                club: document.querySelector('input[name="club"]:checked').value,
+                landingDistance: parseInt(document.querySelector('input[name="landingDistance"]:checked').value)
+            };
+            
+            // 创建模板
+            const template = {
+                id: Date.now().toString(),
+                name: templateName,
+                courseJudgment: courseJudgment
+            };
+            
+            // 添加到模板列表
+            templates.push(template);
+            
+            // 保存到 localStorage
+            localStorage.setItem('golfTemplates', JSON.stringify(templates));
+            
+            // 隐藏弹窗
+            hideSaveTemplateModal();
+            
+            // 显示成功消息
+            alert('模板保存成功');
+        }
+
+        // 应用模板
+        function applyTemplate(templateId) {
+            const template = templates.find(t => t.id === templateId);
+            
+            if (!template) {
+                alert('未找到模板');
+                return;
+            }
+            
+            // 应用模板数据到表单
+            document.querySelector(`input[name="distanceToPin"][value="${template.courseJudgment.distanceToPin}"]`).checked = true;
+            document.querySelector(`input[name="slope"][value="${template.courseJudgment.slope}"]`).checked = true;
+            document.querySelector(`input[name="leftRightLevel"][value="${template.courseJudgment.leftRightLevel}"]`).checked = true;
+            document.querySelector(`input[name="frontObstacle"][value="${template.courseJudgment.frontObstacle}"]`).checked = true;
+            document.querySelector(`input[name="shotType"][value="${template.courseJudgment.shotType}"]`).checked = true;
+            document.querySelector(`input[name="club"][value="${template.courseJudgment.club}"]`).checked = true;
+            
+            // 更新落点距离选项
+            updateLandingDistanceOptions(template.courseJudgment.distanceToPin);
+            document.querySelector(`input[name="landingDistance"][value="${template.courseJudgment.landingDistance}"]`).checked = true;
+            
+            // 返回果岭研判页面
+            showPage('course-judgment-page');
+        }
+
+        // 删除模板
+        function deleteTemplate(templateId) {
+            if (confirm('确定要删除这个模板吗？')) {
+                templates = templates.filter(t => t.id !== templateId);
+                localStorage.setItem('golfTemplates', JSON.stringify(templates));
+                loadTemplates();
+            }
+        }
+
+        // 加载训练时间线
+        function loadTimelineStatistics() {
+            const statisticsContent = document.getElementById('statistics-content');
+            
+            if (trainingHistory.length === 0) {
+                statisticsContent.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        暂无训练记录
+                    </div>
+                `;
+                return;
+            }
+            
+            // 按日期分组训练记录
+            const recordsByDate = {};
+            trainingHistory.forEach(record => {
+                if (!recordsByDate[record.date]) {
+                    recordsByDate[record.date] = [];
+                }
+                recordsByDate[record.date].push(record);
+            });
+            
+            // 按日期降序排序
+            const sortedDates = Object.keys(recordsByDate).sort((a, b) => new Date(b) - new Date(a));
+            
+            // 生成时间线HTML
+            let html = `
+                <div class="mb-6">
+                    <h3 class="font-bold text-lg mb-4">训练时间线</h3>
+                    <div class="relative border-l-2 border-primary pl-6 ml-3 space-y-8">
+            `;
+            
+            sortedDates.forEach((date, index) => {
+                const dateRecords = recordsByDate[date];
+                const dateObj = new Date(date);
+                const formattedDate = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
+                
+                // 计算当日统计
+                let totalShots = 0;
+                let totalSuccessfulShots = 0;
+                let chipShots = 0;
+                let pitchShots = 0;
+                
+                dateRecords.forEach(record => {
+                    totalShots += record.statistics.totalShots;
+                    totalSuccessfulShots += record.statistics.totalSuccessfulShots;
+                    chipShots += record.statistics.shotTypeCounts["切滚球"] || 0;
+                    pitchShots += record.statistics.shotTypeCounts["劈起球"] || 0;
+                });
+                
+                const successRate = totalShots > 0 ? (totalSuccessfulShots / totalShots * 100).toFixed(1) : 0;
+                
+                html += `
+                    <div class="relative">
+                        <div class="absolute -left-[34px] w-6 h-6 rounded-full bg-primary border-4 border-white"></div>
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-bold text-lg text-primary">${formattedDate}</h4>
+                                <span class="bg-primary text-white px-2 py-1 rounded-full text-sm">${successRate}%</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2 mb-3 text-sm">
+                                <div>
+                                    <span class="text-gray-600">总训练球数:</span>
+                                    <span class="font-bold ml-1">${totalShots}球</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">训练次数:</span>
+                                    <span class="font-bold ml-1">${dateRecords.length}次</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">切滚球训练:</span>
+                                    <span class="font-bold ml-1">${chipShots}球</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">劈起球训练:</span>
+                                    <span class="font-bold ml-1">${pitchShots}球</span>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2 mt-3">
+                                <h5 class="font-bold text-gray-700">训练详情:</h5>
+                                ${dateRecords.map(record => `
+                                    <div class="bg-light p-2 rounded-lg">
+                                        <div class="flex justify-between">
+                                            <span class="font-bold">${record.courseJudgment.shotType} (${record.courseJudgment.club})</span>
+                                            <span>${record.courseJudgment.distanceToPin}码</span>
+                                        </div>
+                                        <div class="text-sm text-gray-600">
+                                            ${record.statistics.totalShots}球, 成功率 ${record.statistics.successRate}%
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="mt-3 text-right">
+                                <button class="text-primary hover:text-dark text-sm font-bold" onclick="showHistoryDetail('${dateRecords[0].id}')">
+                                    查看详情 <i class="fa fa-angle-right ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            statisticsContent.innerHTML = html;
+        }
+
+        // 导出数据
+        function exportTrainingData() {
+            if (trainingHistory.length === 0) {
+                alert('暂无训练数据可导出');
+                return;
+            }
+            
+            // 创建CSV内容
+            let csvContent = "日期,训练ID,到旗杆距离,落点距离,打法,球杆,地形,障碍,总球数,成功球数,成功率,失误类型,备注\n";
+            
+            trainingHistory.forEach(record => {
+                record.trainingDetails.forEach(group => {
+                    const row = [
+                        record.date,
+                        record.id,
+                        record.courseJudgment.distanceToPin,
+                        record.courseJudgment.landingDistance,
+                        record.courseJudgment.shotType,
+                        record.courseJudgment.club,
+                        `${record.courseJudgment.slope},${record.courseJudgment.leftRightLevel}`,
+                        record.courseJudgment.frontObstacle,
+                        record.statistics.totalShots,
+                        group.successfulShots,
+                        (group.successfulShots / 6 * 100).toFixed(1) + '%',
+                        group.missType || '无',
+                        `"${group.notes || ''}"`
+                    ];
+                    
+                    csvContent += row.join(',') + '\n';
+                });
+            });
+            
+            // 创建下载链接
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `高尔夫短杆训练记录_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 清空模板
+        function clearTemplates() {
+            if (confirm('确定要清空所有模板吗？此操作不可恢复。')) {
+                templates = [];
+                localStorage.removeItem('golfTemplates');
+                loadTemplates();
+            }
+        }
+    </script>
+</body>
+</html>
